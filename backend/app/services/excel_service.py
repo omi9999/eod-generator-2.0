@@ -1,4 +1,4 @@
- from io import BytesIO
+from io import BytesIO
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 from datetime import datetime
@@ -16,18 +16,15 @@ DEFAULT_TIME_SLOTS = [
     "5:00 pm to 6:00 pm"
 ]
 
-# -------- Helper: Format date to DD-MM-YYYY --------
+# Helper: Format date to DD-MM-YYYY
 def format_date_for_excel(date_val):
-    """Convert a date value to DD-MM-YYYY string for Excel."""
     if not date_val:
         return ""
     if isinstance(date_val, str):
-        # Try to parse YYYY-MM-DD
         try:
             dt = datetime.strptime(date_val, "%Y-%m-%d")
             return dt.strftime("%d-%m-%Y")
         except ValueError:
-            # Already formatted or different format – return as is
             return date_val
     elif isinstance(date_val, datetime):
         return date_val.strftime("%d-%m-%Y")
@@ -101,7 +98,6 @@ def create_excel_bytes(schedule_data, template_bytes=None, time_slots=None):
     try:
         ws['C3'] = schedule_data.get("employee_name", "")
         ws['C4'] = schedule_data.get("position", "")
-        # -------- Date formatting --------
         ws['C5'] = format_date_for_excel(schedule_data.get("date", ""))
     except Exception as e:
         print(f"⚠️ Could not fill employee details: {e}")
