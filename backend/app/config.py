@@ -1,4 +1,5 @@
 import json
+import os
 from pydantic_settings import BaseSettings
 from typing import List
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     DEFAULT_PROVIDER: str = "Groq (Fastest)"
     DEFAULT_MODEL: str = "llama-3.1-8b-instant"
     OLLAMA_BASE_URL: str = "http://localhost:11434/v1"
-    CORS_ORIGINS: List[str] = ["*"]  # default fallback
+    CORS_ORIGINS: List[str] = ["*"]
 
     class Config:
         env_file = ".env"
@@ -26,12 +27,19 @@ class Settings(BaseSettings):
             if field_name == "CORS_ORIGINS":
                 if not raw_val:
                     return ["*"]
+                # If raw_val is a single string like "*", return ["*"]
+                if raw_val.strip() == "*":
+                    return ["*"]
                 # Try to parse as JSON array
                 try:
-                    return json.loads(raw_val)
+                    parsed = json.loads(raw_val)
+                    if isinstance(parsed, list):
+                        return parsed
                 except json.JSONDecodeError:
-                    # Fallback: split by comma
-                    return [x.strip() for x in raw_val.split(',') if x.strip()]
+                    pass
+                # Fallback: split by comma
+                parts = [x.strip() for x in raw_val.split(',') if x.strip()]
+                return parts if parts else ["*"]
             return raw_val
 
 settings = Settings()
